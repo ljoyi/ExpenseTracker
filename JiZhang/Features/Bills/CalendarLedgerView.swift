@@ -25,6 +25,7 @@ struct CalendarLedgerView: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle("账单日历")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("今天") {

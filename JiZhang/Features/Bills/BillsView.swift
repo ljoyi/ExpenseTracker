@@ -20,38 +20,28 @@ struct BillsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                LazyVStack(spacing: DesignTokens.Spacing.large) {
-                    periodLabel
+            VStack(spacing: 0) {
+                topBar
 
-                    LedgerCardView(
-                        summary: viewModel.summary,
-                        periodMode: viewModel.environment.ledgerPeriod.mode,
-                        onTap: {
-                            isShowingStatistics = true
-                        }
-                    )
+                ScrollView {
+                    LazyVStack(spacing: DesignTokens.Spacing.large) {
+                        LedgerCardView(
+                            summary: viewModel.summary,
+                            periodMode: viewModel.environment.ledgerPeriod.mode,
+                            onTap: {
+                                isShowingStatistics = true
+                            }
+                        )
 
-                    recordsSection
+                        recordsSection
+                    }
+                    .padding(.horizontal, DesignTokens.Spacing.large)
+                    .padding(.bottom, DesignTokens.Spacing.xLarge)
                 }
-                .padding(.horizontal, DesignTokens.Spacing.large)
-                .padding(.bottom, DesignTokens.Spacing.xLarge)
+                .background(Color(uiColor: .systemGroupedBackground))
             }
             .background(Color(uiColor: .systemGroupedBackground))
-            .navigationTitle("")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    NavigationLink {
-                        CalendarLedgerView(
-                            environment: viewModel.environment
-                        )
-                    } label: {
-                        Image(systemName: "calendar")
-                    }
-                    .accessibilityLabel("账单日历")
-                }
-            }
+            .toolbar(.hidden, for: .navigationBar)
             .overlay {
                 if viewModel.isLoading && viewModel.items.isEmpty {
                     ProgressView()
@@ -96,30 +86,52 @@ struct BillsView: View {
     }
 
     private var periodLabel: some View {
-        HStack {
-            Button {
-                isShowingPeriodPicker = true
-            } label: {
-                HStack(spacing: DesignTokens.Spacing.xSmall) {
-                    Text(viewModel.periodTitle)
-                        .font(.headline)
-                    Image(systemName: "chevron.down")
-                        .font(.caption.weight(.semibold))
-                }
-                .padding(.horizontal, DesignTokens.Spacing.medium)
-                .padding(.vertical, DesignTokens.Spacing.small)
-                .background(
-                    Color(uiColor: .secondarySystemGroupedBackground),
-                    in: Capsule()
-                )
+        Button {
+            isShowingPeriodPicker = true
+        } label: {
+            HStack(spacing: DesignTokens.Spacing.xSmall) {
+                Text(viewModel.periodTitle)
+                    .font(.headline)
+                Image(systemName: "chevron.down")
+                    .font(.caption.weight(.semibold))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("账本周期")
-            .accessibilityValue(viewModel.periodTitle)
+            .padding(.horizontal, DesignTokens.Spacing.medium)
+            .padding(.vertical, DesignTokens.Spacing.small)
+            .background(
+                Color(uiColor: .secondarySystemGroupedBackground),
+                in: Capsule()
+            )
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("账本周期")
+        .accessibilityValue(viewModel.periodTitle)
+    }
+
+    private var topBar: some View {
+        HStack(spacing: DesignTokens.Spacing.medium) {
+            periodLabel
 
             Spacer()
+
+            NavigationLink {
+                CalendarLedgerView(
+                    environment: viewModel.environment
+                )
+            } label: {
+                Image(systemName: "calendar")
+                    .font(.headline)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        Color(uiColor: .secondarySystemGroupedBackground),
+                        in: Circle()
+                    )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("账单日历")
         }
-        .padding(.top, DesignTokens.Spacing.small)
+        .padding(.horizontal, DesignTokens.Spacing.large)
+        .padding(.vertical, DesignTokens.Spacing.small)
+        .background(.ultraThinMaterial)
     }
 
     @ViewBuilder

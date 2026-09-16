@@ -27,6 +27,7 @@ struct StatisticsView: View {
         .background(Color(uiColor: .systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
         .overlay {
             if viewModel.isLoading {
                 ProgressView()

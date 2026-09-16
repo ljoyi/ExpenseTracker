@@ -98,6 +98,21 @@ final class JiZhangUITests: XCTestCase {
         )
     }
 
+    func testBillsTopBarContainsPeriodAndCalendar() {
+        let app = makeApp()
+        app.launch()
+
+        XCTAssertTrue(
+            app.buttons["账本周期"].waitForExistence(timeout: 3)
+        )
+        XCTAssertTrue(app.buttons["账单日历"].exists)
+
+        app.buttons["账单日历"].tap()
+        XCTAssertTrue(
+            app.navigationBars["账单日历"].waitForExistence(timeout: 3)
+        )
+    }
+
     private func makeApp() -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = ["-ui-testing"]

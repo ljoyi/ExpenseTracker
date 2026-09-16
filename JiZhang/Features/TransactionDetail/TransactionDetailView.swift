@@ -45,6 +45,7 @@ struct TransactionDetailView: View {
         }
         .navigationTitle("账单详情")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.visible, for: .navigationBar)
         .toolbar {
             if snapshot != nil {
                 ToolbarItem(placement: .topBarTrailing) {
