@@ -108,9 +108,12 @@ final class JiZhangUITests: XCTestCase {
         XCTAssertTrue(app.buttons["账单日历"].exists)
 
         app.buttons["账单日历"].tap()
-        XCTAssertTrue(
-            app.navigationBars["账单日历"].waitForExistence(timeout: 3)
+        let components = Calendar.current.dateComponents(
+            [.year, .month],
+            from: Date()
         )
+        let title = "\(components.year ?? 0)年\(components.month ?? 0)月"
+        XCTAssertTrue(app.staticTexts[title].waitForExistence(timeout: 3))
     }
 
     private func makeApp() -> XCUIApplication {

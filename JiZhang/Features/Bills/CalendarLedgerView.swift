@@ -16,17 +16,20 @@ struct CalendarLedgerView: View {
         ScrollView {
             LazyVStack(spacing: DesignTokens.Spacing.large) {
                 calendarCard
-                monthSummaryView
                 selectedDateSection
             }
             .padding(DesignTokens.Spacing.large)
             .padding(.bottom, DesignTokens.Spacing.xLarge)
         }
         .background(Color(uiColor: .systemGroupedBackground))
-        .navigationTitle("账单日历")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.visible, for: .navigationBar)
         .toolbar {
+            ToolbarItem(placement: .principal) {
+                monthNavigation
+            }
+
             ToolbarItem(placement: .topBarTrailing) {
                 Button("今天") {
                     viewModel.goToday()
@@ -63,8 +66,6 @@ struct CalendarLedgerView: View {
 
     private var monthNavigation: some View {
         HStack(spacing: DesignTokens.Spacing.xSmall) {
-            Spacer()
-
             Button {
                 viewModel.moveMonth(by: -1)
             } label: {
@@ -81,16 +82,12 @@ struct CalendarLedgerView: View {
                 Image(systemName: "chevron.right")
             }
             .accessibilityLabel("下个月")
-
-            Spacer()
         }
+        .fixedSize()
     }
 
     private var calendarCard: some View {
-        VStack(spacing: DesignTokens.Spacing.small) {
-            monthNavigation
-                .padding(.bottom, DesignTokens.Spacing.xSmall)
-
+        VStack(spacing: 4) {
             LazyVGrid(columns: calendarColumns, spacing: 6) {
                 ForEach(weekdayTitles, id: \.self) { title in
                     Text(title)
@@ -103,15 +100,19 @@ struct CalendarLedgerView: View {
             }
 
             LazyVGrid(columns: calendarColumns, spacing: 6) {
-                ForEach(viewModel.days) { day in
+                ForEach(visibleCalendarDays) { day in
                     if day.isInDisplayedMonth {
                         dayCell(day)
                     } else {
                         Color.clear
-                            .frame(height: 54)
+                            .frame(height: 48)
                     }
                 }
             }
+
+            Divider()
+
+            monthSummaryView
         }
         .padding(DesignTokens.Spacing.medium)
         .background(
@@ -154,8 +155,8 @@ struct CalendarLedgerView: View {
                 }
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 54, alignment: .top)
-            .padding(.vertical, 3)
+            .frame(height: 48, alignment: .top)
+            .padding(.vertical, 2)
             .background(
                 Color(uiColor: .systemBackground),
                 in: RoundedRectangle(cornerRadius: 6)
@@ -206,11 +207,8 @@ struct CalendarLedgerView: View {
                     : DesignTokens.ColorToken.income
             )
         }
-        .padding(DesignTokens.Spacing.medium)
-        .background(
-            Color(uiColor: .secondarySystemGroupedBackground),
-            in: RoundedRectangle(cornerRadius: DesignTokens.Radius.card)
-        )
+        .padding(.horizontal, DesignTokens.Spacing.xSmall)
+        .padding(.bottom, DesignTokens.Spacing.xSmall)
     }
 
     private func summaryItem(
@@ -235,13 +233,7 @@ struct CalendarLedgerView: View {
     private var selectedDateSection: some View {
         VStack(alignment: .leading, spacing: DesignTokens.Spacing.medium) {
             Text(
-                viewModel.selectedDate.formatted(
-                    .dateTime
-                        .month()
-                        .day()
-                        .weekday(.wide)
-                        .locale(Locale(identifier: "zh_CN"))
-                )
+                selectedDateTitle
             )
             .font(.headline)
 
@@ -249,7 +241,8 @@ struct CalendarLedgerView: View {
                 DayTransactionCard(
                     group: group,
                     environment: viewModel.environment,
-                    onChanged: viewModel.load
+                    onChanged: viewModel.load,
+                    headerContent: .balance
                 )
             } else {
                 EmptyStateView(
@@ -273,6 +266,20 @@ struct CalendarLedgerView: View {
         )
     }
 
+    private var visibleCalendarDays: [CalendarDay] {
+        var days = viewModel.days
+
+        while days.count > 35 {
+            let finalWeek = days.suffix(7)
+            guard finalWeek.allSatisfy({ !$0.isInDisplayedMonth }) else {
+                break
+            }
+            days.removeLast(7)
+        }
+
+        return days
+    }
+
     private var weekdayTitles: [String] {
         [
             "周一",
@@ -283,5 +290,31 @@ struct CalendarLedgerView: View {
             "周六",
             "周日"
         ]
+    }
+
+    private var selectedDateTitle: String {
+        let components = Calendar.current.dateComponents(
+            [.month, .day, .weekday],
+            from: viewModel.selectedDate
+        )
+        let weekdays = [
+            "周日",
+            "周一",
+            "周二",
+            "周三",
+            "周四",
+            "周五",
+            "周六"
+        ]
+        let month = components.month ?? 1
+        let day = components.day ?? 1
+        let weekdayIndex = (components.weekday ?? 1) - 1
+
+        return String(
+            format: "%02d-%02d %@",
+            month,
+            day,
+            weekdays[weekdayIndex]
+        )
     }
 }

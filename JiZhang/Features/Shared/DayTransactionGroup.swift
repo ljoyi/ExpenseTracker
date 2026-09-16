@@ -23,6 +23,10 @@ struct DayTransactionGroup: Identifiable, Equatable {
                 result += item.snapshot.amountMinorUnits
             }
     }
+
+    var balanceMinorUnits: Int64 {
+        incomeMinorUnits - expenseMinorUnits
+    }
 }
 
 func makeDayGroups(

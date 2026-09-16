@@ -1,15 +1,33 @@
 import SwiftUI
 
 struct DayTransactionCard: View {
+    enum HeaderContent {
+        case date
+        case balance
+    }
+
     let group: DayTransactionGroup
     let environment: AppEnvironment
     let onChanged: () -> Void
+    let headerContent: HeaderContent
+
+    init(
+        group: DayTransactionGroup,
+        environment: AppEnvironment,
+        onChanged: @escaping () -> Void,
+        headerContent: HeaderContent = .date
+    ) {
+        self.group = group
+        self.environment = environment
+        self.onChanged = onChanged
+        self.headerContent = headerContent
+    }
 
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(dayTitle)
-                .font(.headline)
+                headerTitle
+                    .font(.headline)
 
                 Spacer()
 
@@ -91,6 +109,18 @@ struct DayTransactionCard: View {
             Text(compactSignedAmount(amount: amount, kind: kind))
                 .foregroundStyle(color(for: kind))
                 .monospacedDigit()
+        }
+    }
+
+    @ViewBuilder
+    private var headerTitle: some View {
+        switch headerContent {
+        case .date:
+            Text(dayTitle)
+        case .balance:
+            Text(
+                "结余：\(MoneyAmount.display(minorUnits: group.balanceMinorUnits))"
+            )
         }
     }
 
